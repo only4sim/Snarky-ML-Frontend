@@ -1,3 +1,6 @@
+import matplotlib
+matplotlib.use('Agg')  # Set Matplotlib to use the 'Agg' backend
+
 from flask import Flask, render_template, request, jsonify
 from sklearn.datasets import load_iris
 from sklearn.tree import DecisionTreeClassifier, plot_tree, export_text
