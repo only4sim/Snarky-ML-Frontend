@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Decision Tree Classifier on Iris Dataset</title>
+</head>
+<body>
+    <h1>Train Decision Tree Classifier</h1>
+    <button onclick="trainModel()">Train Model</button>
+    <div id="modelOutput">
+        <img id="treeImage" src="" style="display:none;">
+        <pre id="treeText"></pre>
+    </div>
+    
+    <script>
+    function trainModel() {
+        fetch('/train', {
+            method: 'POST',
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('treeImage').src = 'data:image/png;base64,' + data.image;
+            document.getElementById('treeImage').style.display = 'block';
+            document.getElementById('treeText').textContent = data.text;
+        });
+    }
+    </script>
+</body>
+</html>
