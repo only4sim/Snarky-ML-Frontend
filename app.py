@@ -22,31 +22,24 @@ def allowed_file(filename):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    if request.method == 'POST':
-        if 'demo_dataset' in request.form:
-            # User selected the demo Iris dataset
-            return redirect(url_for('train_model', filename='iris'))
+    return render_template('index.html')
 
-        file = request.files.get('file')
+@app.route('/train', methods=['POST'])
+def train_model():
+    if 'file' in request.files:
+        file = request.files['file']
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
-            return redirect(url_for('train_model', filename=filename))
-        flash('Invalid file or no file selected')
-        return redirect(request.url)
-    return render_template('index.html')
-
-@app.route('/train/<filename>', methods=['GET', 'POST'])
-def train_model(filename):
-    if filename == 'iris':
+            data = pd.read_csv(filepath)
+            X = data.iloc[:, :-1].values
+            y = data.iloc[:, -1].values
+    elif 'demo_dataset' in request.form and request.form['demo_dataset'] == 'iris':
         iris = load_iris()
         X, y = iris.data, iris.target
     else:
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        data = pd.read_csv(filepath)
-        X = data.iloc[:, :-1].values
-        y = data.iloc[:, -1].values
+        return jsonify({'error': 'No valid dataset provided'}), 400
 
     clf = DecisionTreeClassifier()
     clf.fit(X, y)
