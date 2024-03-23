@@ -1,28 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Decision Tree Classifier on Iris Dataset</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decision Tree Classifier</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { margin-top: 20px; }
+        .output { margin-top: 20px; }
+        label { margin-left: 5px; }
+        #treeImage { max-width: 100%; height: auto; margin-top: 20px; }
+    </style>
 </head>
 <body>
-    <h1>Train Decision Tree Classifier</h1>
-    <button onclick="trainModel()">Train Model</button>
-    <div id="modelOutput">
-        <img id="treeImage" src="" style="display:none;">
+    <h1>Decision Tree Classifier</h1>
+    <p>Select an option below to train the decision tree classifier.</p>
+
+    <div class="container">
+        <h2>Option 1: Upload Your Dataset</h2>
+        <form action="/" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" required>
+            <input type="submit" value="Upload and Train">
+        </form>
+    </div>
+
+    <div class="container">
+        <h2>Option 2: Use the Iris Dataset</h2>
+        <form action="/" method="post">
+            <input type="hidden" name="demo_dataset" value="iris">
+            <input type="submit" value="Train on Iris Dataset">
+        </form>
+    </div>
+
+    <div class="output">
+        <img id="treeImage" src="" alt="Decision Tree Image" style="display:none;">
         <pre id="treeText"></pre>
     </div>
-    
+
     <script>
-    function trainModel() {
-        fetch('/train', {
-            method: 'POST',
-        })
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('treeImage').src = 'data:image/png;base64,' + data.image;
-            document.getElementById('treeImage').style.display = 'block';
-            document.getElementById('treeText').textContent = data.text;
-        });
-    }
+        // Placeholder for any JavaScript code required for handling user actions or AJAX calls.
     </script>
 </body>
 </html>
