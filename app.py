@@ -17,6 +17,50 @@ app.config['UPLOAD_FOLDER'] = 'uploads/'
 app.config['ALLOWED_EXTENSIONS'] = {'csv', 'xlsx'}
 app.secret_key = 'your_secret_key_here'  # Needed for flash messaging
 
+from sklearn import tree as _tree
+import numpy as np
+
+def tree_to_o1js(tree, feature_names):
+    tree_ = tree.tree_
+    feature_names = [f.replace(" ", "_")[:-5] for f in feature_names]
+    
+    js_snippet = ["const DecisionTree = ZkProgram({",
+                  "    name: 'DecisionTree',",
+                  "    publicOutput: Field,",
+                  "methods: {",
+                  "    predict: {",
+                  "        privateInputs: [{}],".format(", ".join(["Field"] * len(feature_names))),
+                  "        method({}): Field {{".format(", ".join(feature_names))]
+
+    def recurse(node, depth):
+        indent = "    " * (depth+2)
+        if tree_.feature[node] != _tree.TREE_UNDEFINED:
+            name = feature_names[tree_.feature[node]]
+            threshold = tree_.threshold[node]
+
+            if depth == 1:
+                js_snippet.append("{}return Provable.if({}.lessThan(Field({})), ".format(indent, name, int(np.round(threshold * 100,0))))
+            else:
+                js_snippet.append("{}Provable.if({}.lessThan(Field({})), ".format(indent, name, int(np.round(threshold * 100,0))))
+            recurse(tree_.children_left[node], depth + 1)
+            js_snippet.append("{}, ".format(indent))
+            recurse(tree_.children_right[node], depth + 1)
+            if depth == 1:
+                js_snippet.append("{});".format(indent))
+            else:
+                js_snippet.append("{})".format(indent))
+        else:
+            js_snippet.append("{}Field({})".format(indent, np.argmax(tree_.value[node][0])))
+
+    recurse(0, 1)
+    js_snippet += ["        },",
+                   "    },",
+                   "},",
+                   "});"]
+    
+    return "\n".join(js_snippet)
+
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
