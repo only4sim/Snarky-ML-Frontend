@@ -18,7 +18,7 @@
 
     <div class="container">
         <h2>Option 1: Upload Your Dataset</h2>
-        <form id="uploadForm" action="/train" method="post" enctype="multipart/form-data">
+        <form id="uploadForm" action="/" method="post" enctype="multipart/form-data">
             <input type="file" name="file" required>
             <input type="submit" value="Upload and Train">
         </form>
@@ -26,42 +26,34 @@
 
     <div class="container">
         <h2>Option 2: Use the Iris Dataset</h2>
-        <form id="irisForm" action="/train" method="post">
+        <form id="irisForm" action="/" method="post">
             <input type="hidden" name="demo_dataset" value="iris">
             <input type="submit" value="Train on Iris Dataset">
         </form>
     </div>
 
     <div class="output">
+        <h3>Decision Tree Visualization</h3>
         <img id="treeImage" src="" alt="Decision Tree Image" style="display:none;">
         <pre id="treeText"></pre>
+        <h3>Decision Tree JavaScript Representation</h3>
+        <pre id="treeJs"></pre>
     </div>
 
     <script>
         document.getElementById('uploadForm').addEventListener('submit', function(event) {
             event.preventDefault();
             const formData = new FormData(this);
-            fetch('/train', {
-                method: 'POST',
-                body: formData,
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.image) {
-                    document.getElementById('treeImage').src = 'data:image/png;base64,' + data.image;
-                    document.getElementById('treeImage').style.display = 'block';
-                }
-                if (data.text) {
-                    document.getElementById('treeText').textContent = data.text;
-                }
-            })
-            .catch(error => console.error('Error:', error));
+            performRequest(formData);
         });
 
-        // Handling form submission for the Iris dataset
         document.getElementById('irisForm').addEventListener('submit', function(event) {
             event.preventDefault();
             const formData = new FormData(this);
+            performRequest(formData);
+        });
+
+        function performRequest(formData) {
             fetch('/train', {
                 method: 'POST',
                 body: formData,
@@ -75,10 +67,12 @@
                 if (data.text) {
                     document.getElementById('treeText').textContent = data.text;
                 }
+                if (data.js_tree) {
+                    document.getElementById('treeJs').textContent = data.js_tree;
+                }
             })
             .catch(error => console.error('Error:', error));
-        });
+        }
     </script>
 </body>
 </html>
-

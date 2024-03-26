@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, jsonify, flash, redirect, url
 from werkzeug.utils import secure_filename
 from sklearn.datasets import load_iris
 from sklearn.tree import DecisionTreeClassifier, plot_tree, export_text
+from sklearn import tree as _tree
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,8 +18,8 @@ app.config['UPLOAD_FOLDER'] = 'uploads/'
 app.config['ALLOWED_EXTENSIONS'] = {'csv', 'xlsx'}
 app.secret_key = 'your_secret_key_here'  # Needed for flash messaging
 
-from sklearn import tree as _tree
-import numpy as np
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 def tree_to_o1js(tree, feature_names):
     tree_ = tree.tree_
@@ -60,16 +61,13 @@ def tree_to_o1js(tree, feature_names):
     
     return "\n".join(js_snippet)
 
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
     return render_template('index.html')
 
 @app.route('/train', methods=['POST'])
 def train_model():
+    # Assume 'file' or 'demo_dataset' are in the request
     if 'file' in request.files:
         file = request.files['file']
         if file and allowed_file(file.filename):
@@ -96,8 +94,9 @@ def train_model():
     plot_url = base64.b64encode(img.getvalue()).decode()
     
     tree_text = export_text(clf)
+    js_tree = tree_to_o1js(clf, feature_names=iris['feature_names'] if 'iris' in request.form.values() else data.columns[:-1])
     
-    return jsonify({'image': plot_url, 'text': tree_text})
+    return jsonify({'image': plot_url, 'text': tree_text, 'js_tree': js_tree})
 
 if __name__ == '__main__':
     app.run(debug=True)
