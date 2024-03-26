@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, jsonify, flash, redirect, url
 from werkzeug.utils import secure_filename
 from sklearn.datasets import load_iris
 from sklearn.tree import DecisionTreeClassifier, plot_tree, export_text
-from sklearn import tree as _tree
+from sklearn.tree import _tree
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
