@@ -4,8 +4,7 @@ matplotlib.use('Agg')  # Use non-interactive Agg backend
 from flask import Flask, render_template, request, jsonify, flash, redirect, url_for
 from werkzeug.utils import secure_filename
 from sklearn.datasets import load_iris
-from sklearn.tree import DecisionTreeClassifier, plot_tree, export_text
-from sklearn.tree import _tree
+from sklearn.tree import DecisionTreeClassifier, plot_tree, export_text, _tree
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -16,15 +15,19 @@ import os
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads/'
 app.config['ALLOWED_EXTENSIONS'] = {'csv', 'xlsx'}
-app.secret_key = 'your_secret_key_here'  # Needed for flash messaging
+app.secret_key = 'your_secret_key_here'
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 def tree_to_o1js(tree, feature_names):
     tree_ = tree.tree_
+    feature_name = [
+        feature_names[i] if i != _tree.TREE_UNDEFINED else "undefined!"
+        for i in tree_.feature
+    ]
     feature_names = [f.replace(" ", "_")[:-5] for f in feature_names]
-    
+
     js_snippet = ["const DecisionTree = ZkProgram({",
                   "    name: 'DecisionTree',",
                   "    publicOutput: Field,",
@@ -36,7 +39,7 @@ def tree_to_o1js(tree, feature_names):
     def recurse(node, depth):
         indent = "    " * (depth+2)
         if tree_.feature[node] != _tree.TREE_UNDEFINED:
-            name = feature_names[tree_.feature[node]]
+            name = feature_name[tree_.feature[node]]
             threshold = tree_.threshold[node]
 
             if depth == 1:
@@ -51,7 +54,7 @@ def tree_to_o1js(tree, feature_names):
             else:
                 js_snippet.append("{})".format(indent))
         else:
-            js_snippet.append("{}Field({})".format(indent, np.argmax(tree_.value[node][0])))
+            js_snippet.append("{}Field({})".format(indent, np.argmax(tree_.value[node])))
 
     recurse(0, 1)
     js_snippet += ["        },",
@@ -67,7 +70,6 @@ def index():
 
 @app.route('/train', methods=['POST'])
 def train_model():
-    # Assume 'file' or 'demo_dataset' are in the request
     if 'file' in request.files:
         file = request.files['file']
         if file and allowed_file(file.filename):

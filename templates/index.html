@@ -3,19 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Decision Tree Classifier</title>
+    <title>Decision Tree Classifier with o1js</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
-        .container { margin-top: 20px; }
-        .output { margin-top: 20px; }
-        label { margin-left: 5px; }
+        .container, .output { margin-top: 20px; }
         #treeImage { max-width: 100%; height: auto; margin-top: 20px; }
     </style>
 </head>
 <body>
-    <h1>Decision Tree Classifier</h1>
-    <p>Select an option below to train the decision tree classifier.</p>
-
+    <h1>Decision Tree Classifier with o1js</h1>
     <div class="container">
         <h2>Option 1: Upload Your Dataset</h2>
         <form id="uploadForm" action="/" method="post" enctype="multipart/form-data">
@@ -23,7 +19,6 @@
             <input type="submit" value="Upload and Train">
         </form>
     </div>
-
     <div class="container">
         <h2>Option 2: Use the Iris Dataset</h2>
         <form id="irisForm" action="/" method="post">
@@ -31,28 +26,30 @@
             <input type="submit" value="Train on Iris Dataset">
         </form>
     </div>
-
     <div class="output">
         <h3>Decision Tree Visualization</h3>
         <img id="treeImage" src="" alt="Decision Tree Image" style="display:none;">
         <pre id="treeText"></pre>
         <h3>Decision Tree JavaScript Representation</h3>
-        <pre id="treeJs"></pre>
+        <pre id="treeJsCode"></pre>
+        <button onclick="compileAndRunJs()">Compile and Run JS Code</button>
     </div>
-
+    <div class="method-call">
+        <h3>Call Method from JS Code</h3>
+        <input type="text" id="jsMethodInput" placeholder="Enter input for JS method">
+        <button onclick="callJsMethod()">Call JS Method</button>
+    </div>
     <script>
         document.getElementById('uploadForm').addEventListener('submit', function(event) {
             event.preventDefault();
             const formData = new FormData(this);
             performRequest(formData);
         });
-
         document.getElementById('irisForm').addEventListener('submit', function(event) {
             event.preventDefault();
             const formData = new FormData(this);
             performRequest(formData);
         });
-
         function performRequest(formData) {
             fetch('/train', {
                 method: 'POST',
@@ -68,10 +65,29 @@
                     document.getElementById('treeText').textContent = data.text;
                 }
                 if (data.js_tree) {
-                    document.getElementById('treeJs').textContent = data.js_tree;
+                    document.getElementById('treeJsCode').textContent = data.js_tree;
                 }
             })
             .catch(error => console.error('Error:', error));
+        }
+        function compileAndRunJs() {
+            const jsCode = document.getElementById('treeJsCode').textContent;
+            try {
+                eval(jsCode);  // Note: Using eval() comes with security risks
+                console.log('JS code executed successfully.');
+            } catch (error) {
+                console.error('Error executing JS code:', error);
+            }
+        }
+        function callJsMethod() {
+            // This is an example; adjust based on your actual JS code
+            const input = document.getElementById('jsMethodInput').value;
+            try {
+                const result = DecisionTree.methods.predict.method(input);  // Adjust based on actual code
+                console.log('Result from JS method:', result);
+            } catch (error) {
+                console.error('Error calling JS method:', error);
+            }
         }
     </script>
 </body>
