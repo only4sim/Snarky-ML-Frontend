@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decision Tree Classifier with o1js</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container, .output { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Decision Tree Classifier with o1js</h1>
+
+    <!-- Input form for prediction data -->
+    <div class="container">
+        <h2>Enter Data for Prediction</h2>
+        <form id="predictionForm">
+            <label for="input1">Input 1:</label>
+            <input type="number" id="input1" name="input1"><br><br>
+            <label for="input2">Input 2:</label>
+            <input type="number" id="input2" name="input2"><br><br>
+            <!-- Add more inputs as needed -->
+            <button type="button" onclick="submitPrediction()">Submit Prediction</button>
+        </form>
+    </div>
+
+    <!-- Display prediction result and verification status -->
+    <div class="output">
+        <h3>Prediction Result</h3>
+        <div id="predictionResult">Awaiting submission...</div>
+        <h3>Verification Status</h3>
+        <div id="verificationStatus">N/A</div>
+    </div>
+
+    <script>
+        function submitPrediction() {
+            const input1 = document.getElementById('input1').value;
+            const input2 = document.getElementById('input2').value;
+            // Construct the payload. Adapt this based on the expected format.
+            const payload = { input1: input1, input2: input2 };
+
+            // Send the payload to the server for prediction and verification
+            fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the prediction result and verification status
+                document.getElementById('predictionResult').textContent = 'Prediction: ' + data.prediction;
+                document.getElementById('verificationStatus').textContent = 'Verification: ' + (data.verified ? 'Successful' : 'Failed');
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
